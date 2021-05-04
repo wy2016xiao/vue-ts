@@ -7,9 +7,12 @@ import { warn } from "../util/index";
 import type { GlobalAPI } from "typescript/global-api";
 
 function Vue(options) {
+  // 对Vue函数没有使用new字符的警告
   if (process.env.NODE_ENV !== "production" && !(this instanceof Vue)) {
     warn("Vue is a constructor and should be called with the `new` keyword");
   }
+
+  // 核心初始化方法
   this._init(options);
 }
 

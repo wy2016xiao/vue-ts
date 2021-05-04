@@ -3,10 +3,10 @@ import type { ComponentOptions } from "typescript/options";
 import type { VNodeComponentOptions, VNodeData } from "typescript/vnode";
 
 export default class VNode {
-  tag?: string;
-  data: VNodeData | undefined;
-  children?: Array<VNode> | null;
-  text?: string;
+  tag?: string; // 标签名 div span
+  data: VNodeData | undefined;// 标签上的属性  id  class等
+  children?: Array<VNode> | null;// 子节点,VNode数组
+  text?: string;// 文本节点
   elm: Node | undefined;
   ns?: string;
   context?: Component; // rendered in this component's scope
@@ -41,29 +41,52 @@ export default class VNode {
     componentOptions?: VNodeComponentOptions,
     asyncFactory?: Function
   ) {
-    this.tag = tag;
-    this.data = data;
-    this.children = children;
-    this.text = text;
-    this.elm = elm;
-    this.ns = undefined;
-    this.context = context;
-    this.fnContext = undefined;
-    this.fnOptions = undefined;
-    this.fnScopeId = undefined;
-    this.key = data && data.key;
-    this.componentOptions = componentOptions;
-    this.componentInstance = undefined;
-    this.parent = undefined;
-    this.raw = false;
-    this.isStatic = false;
-    this.isRootInsert = true;
-    this.isComment = false;
-    this.isCloned = false;
-    this.isOnce = false;
-    this.asyncFactory = asyncFactory;
-    this.asyncMeta = undefined;
-    this.isAsyncPlaceholder = false;
+    // 当前节点标签名
+    this.tag = tag
+    // 当前节点html标签上面定义的属性
+    // id class show key等等
+    // 是一个VNodeData类型，可以参考VNodeData类型中的数据信息
+    this.data = data
+    // 当前节点的子节点，一个数组
+    this.children = children
+    // 当前节点的文本
+    this.text = text
+    // 当前虚拟节点对应的真实节点
+    this.elm = elm
+    // 当前节点的命名空间
+    this.ns = undefined
+    // 编译作用域
+    this.context = context
+    // 函数化组件作用域
+    this.fnContext = undefined
+    this.fnOptions = undefined
+    this.fnScopeId = undefined
+    // 节点的key属性，被当做节点的标志，用以diff优化
+    this.key = data && data.key
+    // 当前节点对应的组件的options选项
+    this.componentOptions = componentOptions
+    // 当前节点对应的组件的实例
+    this.componentInstance = undefined
+    // 当前节点的父节点
+    this.parent = undefined
+    // 简而言之就是是否为原生HTML或只是普通文本，innerHTML的时候为true，textContent的时候为false
+    this.raw = false
+    // 静态节点的标志
+    this.isStatic = false
+    // 是否作为跟节点插入
+    this.isRootInsert = true
+    // 是否为注释节点
+    this.isComment = false
+    // 是否为克隆节点
+    this.isCloned = false
+    // 是否有v-once指令
+    this.isOnce = false
+    // 异步组件的工厂方法
+    this.asyncFactory = asyncFactory
+    // 异步源
+    this.asyncMeta = undefined
+    // 是否异步的预赋值
+    this.isAsyncPlaceholder = false
   }
 
   // DEPRECATED: alias for componentInstance for backwards compat.

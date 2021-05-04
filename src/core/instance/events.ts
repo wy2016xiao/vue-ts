@@ -9,10 +9,15 @@ import {
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
 
+/**
+ * 初始化_events _hasHookEvent变量
+ */
 export function initEvents(vm: Component) {
   vm._events = Object.create(null)
+  // 标识是否有hook:样式的钩子事件
   vm._hasHookEvent = false
   // init parent attached events
+  // 获取_parentListeners，表示父组件对子组件（当前实例）的监听，即v-on
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)
@@ -39,12 +44,22 @@ function createOnceHandler(event, fn) {
   }
 }
 
+/**
+ * 更新实例上的事件列表
+ *
+ * @date 15/04/2021
+ * @export
+ * @param {Component} vm
+ * @param {Object} listeners - _parentListeners对象
+ * @param {(Object | null)} [oldListeners]
+ */
 export function updateComponentListeners(
   vm: Component,
   listeners: Object,
   oldListeners?: Object | null
 ) {
   target = vm
+  // 更新实例上的事件列表
   updateListeners(
     listeners,
     oldListeners || {},

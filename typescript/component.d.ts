@@ -4,10 +4,9 @@ import { ComponentOptions } from "./options";
 import { ScopedSlotsData, VNodeChildren, VNodeData } from "./vnode";
 
 // TODO this should be using the same as /component/
-
 declare class Component {
   // constructor information
-  static cid: number;
+  static cid: number; // 组件id
   static options: Record<string, any>;
   // extend
   static extend: (options: Record<string, any>) => Function;
