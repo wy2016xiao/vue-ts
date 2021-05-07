@@ -3,6 +3,13 @@ import { parseText } from 'compiler/parser/text-parser'
 import { parseStyleText } from 'web/util/style'
 import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
 
+/**
+ * 处理style和:style
+ *
+ * @date 05/05/2021
+ * @param {ASTElement} el
+ * @param {CompilerOptions} options
+ */
 function transformNode(el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticStyle = getAndRemoveAttr(el, 'style')

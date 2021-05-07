@@ -2,6 +2,13 @@
 import { parseText } from 'compiler/parser/text-parser'
 import { getAndRemoveAttr, getBindingAttr, baseWarn } from 'compiler/helpers'
 
+/**
+ * 处理class和:class
+ *
+ * @date 05/05/2021
+ * @param {ASTElement} el
+ * @param {CompilerOptions} options
+ */
 function transformNode(el: ASTElement, options: CompilerOptions) {
   const warn = options.warn || baseWarn
   const staticClass = getAndRemoveAttr(el, 'class')

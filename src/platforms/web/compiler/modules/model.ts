@@ -18,6 +18,14 @@ import {
   createASTElement,
 } from 'compiler/parser/index'
 
+/**
+ * 预处理v-model
+ *
+ * @date 05/05/2021
+ * @param {ASTElement} el
+ * @param {CompilerOptions} options
+ * @return {*}  
+ */
 function preTransformNode(el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {
     const map = el.attrsMap

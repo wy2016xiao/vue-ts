@@ -51,23 +51,37 @@ export function generate(
 ): CodegenResult {
   const state = new CodegenState(options)
   // fix #11483, Root level <script> tags should not be rendered.
+  //核心部分，生成render表达式字符串主体
   const code = ast
     ? ast.tag === 'script'
       ? 'null'
       : genElement(ast, state)
     : '_c("div")'
   return {
+    //最外层用with(this)包裹
     render: `with(this){return ${code}}`,
+    //被标记为 staticRoot 节点的 VNode 就会单独生成 staticRenderFns
     staticRenderFns: state.staticRenderFns,
   }
 }
 
+/**
+ * 生成createElement的参数字符串
+ *
+ * @date 2020-05-04
+ * @export
+ * @param {ASTElement} el
+ * @param {CodegenState} state
+ * @returns {string}
+ */
 export function genElement(el: ASTElement, state: CodegenState): string {
   if (el.parent) {
     el.pre = el.pre || el.parent.pre
   }
 
+  // 对一些标签属性进行处理
   if (el.staticRoot && !el.staticProcessed) {
+    // 静态的根节点
     return genStatic(el, state)
   } else if (el.once && !el.onceProcessed) {
     return genOnce(el, state)
@@ -82,15 +96,20 @@ export function genElement(el: ASTElement, state: CodegenState): string {
   } else {
     // component or element
     let code
+    //组件的处理
     if (el.component) {
       code = genComponent(el.component, el, state)
     } else {
+      //核心的body部分
+      //1、生成节点的数据对象data的字符串
       let data
       if (!el.plain || (el.pre && state.maybeComponent(el))) {
         data = genData(el, state)
       }
 
+      //2、查找其子节点,生成子节点的字符串
       const children = el.inlineTemplate ? null : genChildren(el, state, true)
+      //3、将tag，data，children拼装成字符串
       code = `_c('${el.tag}'${
         data ? `,${data}` : '' // data
       }${
@@ -151,30 +170,54 @@ function genOnce(el: ASTElement, state: CodegenState): string {
   }
 }
 
+/**
+ * 针对v-if节点生成render表达式
+ *
+ * @date 2020-05-04
+ * @export
+ * @param {*} el
+ * @param {CodegenState} state
+ * @param {Function} [altGen]
+ * @param {string} [altEmpty]
+ * @returns {string}
+ */
 export function genIf(
   el: any,
   state: CodegenState,
   altGen?: Function,
   altEmpty?: string
 ): string {
-  el.ifProcessed = true // avoid recursion
+  el.ifProcessed = true // avoid recursion 同样的，打个标记表示该节点已经被处理过了
   return genIfConditions(el.ifConditions.slice(), state, altGen, altEmpty)
 }
 
+/**
+ * 针对v-if节点生成render表达式
+ * @date 2020-05-05
+ * @param {ASTIfConditions} conditions
+ * @param {CodegenState} state
+ * @param {Function} [altGen]
+ * @param {string} [altEmpty]
+ * @returns {string}
+ */
 function genIfConditions(
   conditions: ASTIfConditions,
   state: CodegenState,
   altGen?: Function,
   altEmpty?: string
 ): string {
+  // 如果没有表达式，直接使用普通的_e
   if (!conditions.length) {
     return altEmpty || '_e()'
   }
 
+  //对于多个condition，将调用genIfConditions进行递归生成二元表达式
   const condition = conditions.shift()!
   if (condition.exp) {
+    //生成本次条件的二元表达式
     return `(${condition.exp})?${genTernaryExp(
       condition.block
+      // 递归生成后续的二元表达式
     )}:${genIfConditions(conditions, state, altGen, altEmpty)}`
   } else {
     return `${genTernaryExp(condition.block)}`
@@ -190,6 +233,17 @@ function genIfConditions(
   }
 }
 
+/**
+ * 针对包含v-for属性的标签，将调用该方法生成render表达式
+ *
+ * @date 2020-05-04
+ * @export
+ * @param {*} el
+ * @param {CodegenState} state
+ * @param {Function} [altGen]
+ * @param {string} [altHelper]
+ * @returns {string}
+ */
 export function genFor(
   el: any,
   state: CodegenState,
@@ -217,7 +271,9 @@ export function genFor(
     )
   }
 
+  //1、标记已处理，防止进入死循环
   el.forProcessed = true // avoid recursion
+  //2、function...return...包裹字符串，调用genElement继续节点字符串生成
   return (
     `${altHelper || '_l'}((${exp}),` +
     `function(${alias}${iterator1}${iterator2}){` +
@@ -465,6 +521,18 @@ function genScopedSlot(el: ASTElement, state: CodegenState): string {
   return `{key:${el.slotTarget || `"default"`},fn:${fn}${reverseProxy}}`
 }
 
+/**
+ * 生成子节点字符串
+ *
+ * @date 2020-05-04
+ * @export
+ * @param {ASTElement} el
+ * @param {CodegenState} state
+ * @param {boolean} [checkSkip]
+ * @param {Function} [altGenElement]
+ * @param {Function} [altGenNode]
+ * @returns {(string | void)}
+ */
 export function genChildren(
   el: ASTElement,
   state: CodegenState,
@@ -493,6 +561,7 @@ export function genChildren(
       ? getNormalizationType(children, state.maybeComponent)
       : 0
     const gen = altGenNode || genNode
+    //拼装子节点的字符串
     return `[${children.map((c) => gen(c, state)).join(',')}]${
       normalizationType ? `,${normalizationType}` : ''
     }`
@@ -535,6 +604,10 @@ function needsNormalization(el: ASTElement): boolean {
   return el.for !== undefined || el.tag === 'template' || el.tag === 'slot'
 }
 
+/**
+ * 生成节点字符串
+ * 节点可以是element or comment or test
+ */
 function genNode(node: ASTNode, state: CodegenState): string {
   if (node.type === 1) {
     return genElement(node, state)

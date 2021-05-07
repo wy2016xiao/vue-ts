@@ -13,6 +13,7 @@ function Vue(options) {
   }
 
   // 核心初始化方法
+  // 通过initMixin附上
   this._init(options);
 }
 

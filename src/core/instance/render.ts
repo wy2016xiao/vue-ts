@@ -16,8 +16,15 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { isUpdatingChildComponent } from './lifecycle'
 import type { Component } from 'typescript/component'
 
+/**
+ * 首先对_vnode与_staticTrees进行初始化。
+ * 接着对$slots,$scopedSlots赋值。
+ * vm._c与vm.$createElement分别是对template和render函数处理的方法
+ */
 export function initRender(vm: Component) {
+  // 保存node树的根节点
   vm._vnode = null // the root of the child tree
+  // v-once树的缓存,只渲染一次
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
   const parentVnode = (vm.$vnode = options._parentVnode!) // the placeholder node in parent tree
@@ -29,10 +36,12 @@ export function initRender(vm: Component) {
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
   // @ts-expect-error
+  // tamplate渲染为render函数时的处理
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.
   // @ts-expect-error
+  // 用户自己用render函数
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
@@ -40,6 +49,7 @@ export function initRender(vm: Component) {
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
+  // 对$attrs和listeners进行监听
   if (process.env.NODE_ENV !== 'production') {
     defineReactive(
       vm,
@@ -77,6 +87,9 @@ export function initRender(vm: Component) {
   }
 }
 
+/**
+ * 当前的渲染实例
+ */
 export let currentRenderingInstance: Component | null = null
 
 // for testing only
@@ -84,6 +97,13 @@ export function setCurrentRenderingInstance(vm: Component) {
   currentRenderingInstance = vm
 }
 
+/**
+ * 定义了$nextTick _render 方法
+ *
+ * @date 2021-01-06
+ * @export
+ * @param {Class<Component>} Vue
+ */
 export function renderMixin(Vue: Component) {
   // install runtime convenience helpers
   installRenderHelpers(Vue.prototype)
@@ -114,6 +134,16 @@ export function renderMixin(Vue: Component) {
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
       currentRenderingInstance = vm
+      // _renderProxy就是vm，
+      // render的内容
+      // t.g. 
+      // render: function (createElement) {
+      //   return createElement(
+      //     'h' + this.level,   // 标签名称
+      //     this.$slots.default // 子元素数组
+      //   )
+      // }
+      // 调用用户传入的render函数
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)

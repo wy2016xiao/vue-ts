@@ -260,6 +260,7 @@ export function mountComponent(
     // vm._update将vnode渲染成实际的dom节点
 
     // 这里在render时就会触发html中你写的变量的getter
+    // vm._render() => VNode
     updateComponent = () => {
       vm._update(vm._render(), hydrating);
     };
@@ -270,8 +271,8 @@ export function mountComponent(
   // component's mounted hook), which relies on vm._watcher being already defined
   // 首次渲染，并监听数据变化，并实现dom的更新
   // new Watcher干了两件事情
-  // 执行updateComponent方法，实现dom的渲染，并完成表达式对属性变量的依赖收集。
-  // 一旦包含的表达式中的属性变量有变化，将重新执行update。
+  // 初始化实例时执行updateComponent方法，实现dom的渲染，并完成表达式对属性变量的依赖收集。
+  // 一旦包含的表达式中的属性变量有变化，将重新执行updateComponent方法。
   new Watcher(
     vm,
     updateComponent,

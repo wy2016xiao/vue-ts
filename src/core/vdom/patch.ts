@@ -33,7 +33,7 @@ export const emptyNode = new VNode('', {}, [])
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
 /**
- * 判断两个节点是否相同,无需完全相同
+ * 判断两个节点是否相同,无需完全相同，只比较下方的属性
  * key tag isComment !!data input-type
  * @date 2020-05-07
  * @param {*} a
@@ -635,7 +635,7 @@ export function createPatchFunction(backend) {
     // osv === nsv, oev === nev 时只做下标更改,  下标向中间移动一位
     // osv === nev os移动到oe后面,  双方下标向中间移动一位
     // oev === nsv oe移动到os前面,  双方下标向中间移动一位
-    // 3.四个地方都不相同的情况下,判断在oldCh中是否有相同key的vnode
+    // 3.四个地方都不相同的情况下,判断在oldCh中是否有和nsv相同key的vnode
     // (1) 在oldCh中有相同key的vnode
     //     进一步判断是否为相同vnode
     //        ①vnode一样,插入到oldStartVnode前,并将oldvnode置为undefined
