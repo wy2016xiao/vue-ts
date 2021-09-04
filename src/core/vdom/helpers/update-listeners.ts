@@ -25,7 +25,7 @@ const normalizeEvent = cached((name: string): {
 })
 
 /**
- *
+ * 创建事件调用者
  *
  * @date 16/04/2021
  * @export

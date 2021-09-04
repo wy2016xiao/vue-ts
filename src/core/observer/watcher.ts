@@ -46,7 +46,7 @@ export default class Watcher {
   newDepIds: SimpleSet// 该watcher对应的新的dep的id的缓冲
   before?: Function// 相当于watcher的钩子,当数据变化之后，触发更新之前，调用
   getter: Function// 获取当前'a.b.c'或者传入函数的值,有一个可选参数,一般传入当前实例,代表this.a.b.c
-  value: any// 当前值
+  value: any// 当前值 巧妙做个缓存
 
   constructor(
     vm: Component,
@@ -91,6 +91,7 @@ export default class Watcher {
     // parse expression for getter
     // 2.解析表达式,获取getter方法
     // 如果是function类型,直接将其设置为getter方法
+    // 即render watcher
     if (typeof expOrFn === 'function') {
       this.getter = expOrFn
     } else {
@@ -123,7 +124,7 @@ export default class Watcher {
     const vm = this.vm
     try {
       // 2.核心代码,依赖收集
-      // 获取当前值
+      // 获取被watch对象的当前值
       value = this.getter.call(vm, vm)
     } catch (e) {
       if (this.user) {
@@ -236,6 +237,7 @@ export default class Watcher {
         // 调用cb
         if (this.user) {
           // 如果是调用的用户定义的,catch一下
+          // 即user watcher
           try {
             this.cb.call(this.vm, value, oldValue)
           } catch (e) {

@@ -46,12 +46,14 @@ export class Observer {
   constructor(value: any) {
     // 1.初始化
     this.value = value
+    // 在对象本身增删属性或者数组变化的时候被触发的Dep
     this.dep = new Dep()
     this.vmCount = 0
     // 给被观察对象加上__ob__属性，属性值是Observer实例
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
-      if (hasProto) { // can we use __proto__
+      // can we use __proto__
+      if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
         copyAugment(value, arrayMethods, arrayKeys)
@@ -181,6 +183,7 @@ export function defineReactive(
   shallow?: boolean
 ) {
   // 1.创建属性数据的发布器
+  // 用于由对象本身修改而触发setter函数导致闭包中的Dep通知所有的Watcher对象
   const dep = new Dep()
 
   // 获取该属性的描述符
@@ -250,9 +253,7 @@ export function defineReactive(
 }
 
 /**
- * Set a property on an object. Adds the new property and
- * triggers change notification if the property doesn't
- * already exist.
+ * this.$set()
  * 向响应式对象中添加一个属性，并确保这个新属性同样是响应式的，且触发视图更新。
  * 它必须用于向响应式对象上添加新属性，因为 Vue 无法探测普通的新增属性 
  * (比如 this.myObject.newProperty = 'hi')
@@ -294,7 +295,9 @@ export function set(target: Array<any> | Record<string,any>, key: any, val: any)
 }
 
 /**
- * Delete a property and trigger change if necessary.
+ * 删除对象的 property。如果对象是响应式的，确保删除能触发更新视图。
+ * 这个方法主要用于避开 Vue 不能检测到 property 被删除的限制，但是你应该很少会使用它。
+ * this.$delete
  */
 export function del(target: Array<any> | Object, key: any) {
   if (
